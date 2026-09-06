@@ -26,6 +26,29 @@ type BootState =
   | { status: 'error'; message: string }
   | { status: 'ready'; defaultAgentSpec: HarnessAgentSpec; openSettings: boolean };
 
+function SaiBrandLogo({ className, variant = 'icon' }: { className?: string; variant?: 'icon' | 'logo' }) {
+  if (variant === 'logo') {
+    return (
+      <span
+        className={`font-bold tracking-tight text-base text-text-primary select-none px-1 inline-flex items-center gap-2.5 ${className ?? ''}`}
+      >
+        <div className="flex size-9 items-center justify-center rounded-xl bg-[#1a1a1e] border border-[#2e2e38] shadow-sm shrink-0 overflow-hidden">
+          <img src="/sai-logo.png" alt="SAI Logo" className="h-7 w-7 object-contain rounded" />
+        </div>
+        <span>SAI: Sovereign Agentic Workbench</span>
+      </span>
+    );
+  }
+  return (
+    <div
+      className="flex size-9 items-center justify-center rounded-xl bg-[#1a1a1e] border border-[#2e2e38] shadow-sm select-none hover:border-[#45b7b8]/60 transition-colors overflow-hidden"
+      title="SAI: Sovereign Agentic Workbench"
+    >
+      <img src="/sai-logo.png" alt="SAI Logo" className="h-7 w-7 object-contain rounded" />
+    </div>
+  );
+}
+
 export function App() {
   const authError = parseAuthErrorReason(window.location.search);
   const [session, setSession] = useState<SessionState | 'checking'>('checking');
@@ -58,8 +81,8 @@ export function App() {
       window.history.state,
       '',
       stripAuthErrorSearch({
-        pathname: window.location.pathname,
         search: window.location.search,
+        pathname: window.location.pathname,
         hash: window.location.hash,
       }),
     );
@@ -69,6 +92,7 @@ export function App() {
     if (session !== 'authenticated') {
       return;
     }
+
     const state = { cancelled: false };
     void (async () => {
       try {
@@ -76,15 +100,28 @@ export function App() {
         if (state.cancelled) {
           return;
         }
+
+        const defaultInstructions = `You are SAI (Sovereign Agentic Infrastructure), an air-gapped refinery copilot.
+CRITICAL OPERATIONAL RULES:
+- NEVER calculate fluid mechanics, velocity, or pressure drops using mental arithmetic. Always invoke \`execute_engineering_calc\`.
+- NEVER output raw JSON tool mockups or strings like \`{"name": ...}\` in chat text. Invoke tools natively via API tool calls.
+- NEVER output mock document templates in markdown when an MOC or report is requested. Always invoke \`generate_sai_approval_note\` with file_format='docx' to persist the document to ~/sai-output/.
+- When an operational issue is described, sequentially call \`execute_engineering_calc\` first, then call \`generate_sai_approval_note\` with the calculated results.`;
+        const defaultAgentConfig = {
+          sandbox: { enabled: capabilities.sandbox.enabled },
+          generative_ui: { enabled: false },
+        };
+        const defaultMcpServers = [{ name: 'sai-refinery-tools', preload: true }];
         const first = models[0];
-        const sandboxConfig = { sandbox: { enabled: capabilities.sandbox.enabled } };
         if (first === undefined) {
           setBoot({
             status: 'ready',
             openSettings: true,
             defaultAgentSpec: {
               model: { name: '' },
-              config: sandboxConfig,
+              instructions: defaultInstructions,
+              mcpServers: defaultMcpServers,
+              config: defaultAgentConfig,
             },
           });
           return;
@@ -92,6 +129,7 @@ export function App() {
         const reasoningEfforts = first.properties.reasoningEfforts;
         // Default to the lowest real effort, not "none" — catalog lists are ordered ascending.
         const defaultReasoningEffort = reasoningEfforts?.find(effort => effort !== 'none') ?? reasoningEfforts?.[0];
+
         setBoot({
           status: 'ready',
           openSettings: false,
@@ -100,7 +138,9 @@ export function App() {
               name: first.name,
               ...(defaultReasoningEffort ? { params: { reasoningEffort: defaultReasoningEffort } } : {}),
             },
-            config: sandboxConfig,
+            instructions: defaultInstructions,
+            mcpServers: defaultMcpServers,
+            config: defaultAgentConfig,
           },
         });
       } catch (err) {
@@ -118,7 +158,11 @@ export function App() {
   }, [session]);
 
   const overrides: SlotOverrides = useMemo(
-    () => ({ ShellActionsActionSlot: LogoutButton, WelcomeScreen: NewAgentWelcomeScreen }),
+    () => ({
+      ShellActionsActionSlot: LogoutButton,
+      WelcomeScreen: NewAgentWelcomeScreen,
+      BrandLogo: SaiBrandLogo,
+    }),
     [],
   );
 
@@ -171,6 +215,13 @@ export function App() {
         server={{ type: 'trueforge', baseUrl: API_BASE_URL, fetch: authAwareFetch }}
         layout="sidebar"
         withRouter
+        theme={{
+          mode: 'dark',
+          brand: {
+            mode: 'icon-title',
+            name: 'SAI: Sovereign Agentic Workbench',
+          },
+        }}
         {...(routerBasename ? { routes: { basename: routerBasename } } : {})}
         agentConfig={{
           mode: 'AgentLibraryWithComposer',

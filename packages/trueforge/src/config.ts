@@ -44,6 +44,7 @@ const DEFAULT_OIDC_USER_DISPLAY_NAME_CLAIM = 'name';
 const DEFAULT_OIDC_USER_ROLE_CLAIM = 'groups';
 const DEFAULT_OIDC_ADMIN_ROLE_VALUE = 'admin';
 const DEFAULT_OIDC_SCOPES = 'openid,profile,email';
+const DEFAULT_LOCAL_LLM_BASE_URL = 'http://127.0.0.1:11434/v1';
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -496,6 +497,11 @@ export interface SharedServerConfiguration {
    * `TRUEFORGE_MTLS_ENABLED` is true. Env: `TRUEFORGE_MTLS_CERTS_DIR`. Default `/etc/tls`.
    */
   TRUEFORGE_MTLS_CERTS_DIR: string;
+  /**
+   * Base URL for local OpenAI-compatible LLM endpoint (e.g. Ollama).
+   * Env: `LOCAL_LLM_BASE_URL`. Default: `http://127.0.0.1:11434/v1`.
+   */
+  LOCAL_LLM_BASE_URL: string;
 }
 
 export type StandaloneServerConfiguration = SharedServerConfiguration & {
@@ -686,6 +692,7 @@ const shared: SharedServerConfiguration = {
     defaultValue: false,
   }),
   TRUEFORGE_MTLS_CERTS_DIR: getEnv('TRUEFORGE_MTLS_CERTS_DIR', { defaultValue: '/etc/tls' }) ?? '/etc/tls',
+  LOCAL_LLM_BASE_URL: getEnv('LOCAL_LLM_BASE_URL') ?? DEFAULT_LOCAL_LLM_BASE_URL,
 };
 
 const configuration: ServerConfiguration = standalone

@@ -11,7 +11,7 @@ export function GetStartedScreen() {
     <main className="auth-screen">
       <div className="auth-screen-card">
         <BrandLogo className="auth-screen-logo" />
-        <h1 className="auth-screen-title">Welcome to TrueForge</h1>
+        <h1 className="auth-screen-title">Welcome to SAI: Sovereign Agentic Workbench</h1>
         <button
           type="button"
           className="auth-screen-button"

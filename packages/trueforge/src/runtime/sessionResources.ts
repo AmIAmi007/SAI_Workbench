@@ -80,12 +80,13 @@ export async function getModelDetails({
   // Provider types are adapter names, so this assignment is what keeps them so: a type with no
   // `buildLanguageModel` case fails to compile here.
   const { type, base_url: baseUrl } = provider.manifest;
+  const effectiveBaseUrl = type === 'openai' ? (configuration.LOCAL_LLM_BASE_URL ?? baseUrl) : baseUrl;
   return {
     providerConfig: {
       provider: { type, name: provider.name },
       model: { id: model.model_id, name: model.name },
       name,
-      baseUrl,
+      baseUrl: effectiveBaseUrl,
       apiKey: provider.manifest.auth?.api_key ?? '',
       headers: {},
     },

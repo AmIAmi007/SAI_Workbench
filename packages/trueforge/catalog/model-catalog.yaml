@@ -5,6 +5,16 @@ providers:
   - type: openai
     logo: https://assets.production.truefoundry.com/openai.svg
     models:
+      - model_id: qwen2.5-coder:7b
+        name: qwen2.5-coder-7b
+        properties:
+          context_length: 32768
+          max_output_tokens: 8192
+      - model_id: llama3.2-vision:11b
+        name: llama3.2-vision-11b
+        properties:
+          context_length: 131072
+          max_output_tokens: 8192
       - model_id: gpt-5.4-mini
         name: gpt-5-4-mini
         properties:

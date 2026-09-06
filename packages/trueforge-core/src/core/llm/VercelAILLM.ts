@@ -131,10 +131,11 @@ function compatibleModel(config: VercelAIProviderConfig): LanguageModel {
   if (baseUrl === undefined) {
     throw new Error(`Provider "${provider.type}" requires a baseUrl`);
   }
+  const key = apiKey.trim() !== '' ? apiKey : 'ollama';
   const client = createOpenAICompatible({
     name: provider.type,
     baseURL: baseUrl,
-    apiKey,
+    apiKey: key,
     // Without this the adapter silently downgrades json_schema to a schema-less json_object.
     supportsStructuredOutputs: true,
     // These endpoints omit token counts from streamed responses unless asked.
@@ -150,6 +151,9 @@ export function buildLanguageModel(config: VercelAIProviderConfig): LanguageMode
 
   switch (provider.type) {
     case 'openai': {
+      if (baseUrl !== undefined && !baseUrl.includes('api.openai.com')) {
+        return compatibleModel(config);
+      }
       const client = createOpenAI({
         apiKey,
         ...(baseUrl !== undefined ? { baseURL: baseUrl } : {}),
@@ -878,6 +882,7 @@ export type StreamTextArgs = LanguageModelCallOptions & {
   instructions?: string;
   messages: ModelMessage[];
   tools?: ToolSet;
+  toolChoice?: 'auto' | 'none' | 'required';
   providerOptions?: ProviderOptions;
   abortSignal?: AbortSignal;
   maxRetries: number;
@@ -926,7 +931,7 @@ export function buildStreamTextArgs(input: {
     model,
     ...(instructions !== undefined ? { instructions } : {}),
     messages,
-    ...(tools !== undefined ? { tools } : {}),
+    ...(tools !== undefined ? { tools, toolChoice: 'auto' as const } : {}),
     ...(reasoning !== undefined ? { reasoning } : {}),
     ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
     ...(temperature != null ? { temperature } : {}),

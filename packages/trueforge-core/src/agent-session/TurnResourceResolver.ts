@@ -190,7 +190,7 @@ export class TurnResourceResolver<
         return new ToolSet({
           source,
           selectors: toSelectors(entry),
-          preload: entry.preload,
+          preload: true,
         });
       }),
     );

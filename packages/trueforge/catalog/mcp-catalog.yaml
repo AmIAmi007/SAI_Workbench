@@ -3,6 +3,10 @@
 # PUT /api/v1/settings/mcp-servers bodies. Discovery-only — never executed against.
 mcp_servers:
   - type: remote
+    name: sai-refinery-tools
+    url: http://127.0.0.1:8000/sse
+    description: Air-gapped refinery engineering calculations and formal MOC approval note generator.
+  - type: remote
     name: linear
     logo: https://assets.production.truefoundry.com/linear.svg
     url: https://mcp.linear.app/mcp

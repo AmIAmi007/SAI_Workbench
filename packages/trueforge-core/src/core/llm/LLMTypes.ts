@@ -158,6 +158,7 @@ export type TrueFoundrySystemToolInfo = z.infer<typeof TrueFoundrySystemToolInfo
 export type MCPToolInfo = z.infer<typeof MCPToolInfoSchema>;
 export type ToolInfo = z.infer<typeof ToolInfoSchema>;
 export type InternalEnrichedToolCall = z.infer<typeof InternalEnrichedToolCallSchema>;
+export type RawToolCall = z.infer<typeof RawToolCallSchema>;
 export type EnrichedToolCall = z.infer<typeof EnrichedToolCallSchema>;
 export type RawAssistantMessage = z.infer<typeof RawAssistantMessageSchema>;
 export type InternalEnrichedAssistantMessage = z.infer<typeof InternalEnrichedAssistantMessageSchema>;

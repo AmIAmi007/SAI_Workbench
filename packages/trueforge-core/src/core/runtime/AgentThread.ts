@@ -95,6 +95,7 @@ import {
 import { DeferredTool } from './DeferredTool';
 import { createEmptyAgentThreadMetrics, updateMetricsFromUsage, type AgentThreadMetrics } from './metrics';
 import { getClosableOpenToolCallIds, OpenToolCallCloser } from './OpenToolCallCloser';
+import { extractToolCallsFromAssistantMessage } from './toolCallExtraction';
 import { isEmptyMessageContent, processAgentUserInput, type AgentInputUserMessage } from './UserInputMessage';
 
 const DEFAULT_ITERATION_LIMIT = 25;
@@ -424,9 +425,11 @@ async function enrichAssistantMessage({
   toolMapping: Map<string, MappedMCPTool>;
   resolveUnderlyingTool: boolean;
 }): Promise<InternalEnrichedAssistantMessage> {
+  const normalizedMessage = extractToolCallsFromAssistantMessage({ assistantMessage, toolMapping });
+
   // Omit tool_calls when empty; OpenAI rejects `tool_calls: []` on replay.
-  if (!assistantMessage.tool_calls?.length) {
-    const { tool_calls, ...rest } = assistantMessage;
+  if (!normalizedMessage.tool_calls?.length) {
+    const { tool_calls, ...rest } = normalizedMessage;
     void tool_calls;
     return rest;
   }
@@ -435,7 +438,7 @@ async function enrichAssistantMessage({
   // (via listTools), making subsequent calls instant cache hits.
   // No race conditions either way but parallelism buys nothing here.
   const enrichedToolCalls = [];
-  for (const toolCall of assistantMessage.tool_calls) {
+  for (const toolCall of normalizedMessage.tool_calls) {
     const toolInfo = toolMapping.get(toolCall.function.name);
     if (!toolInfo) {
       enrichedToolCalls.push({ ...toolCall, tool_info: makeUnknownToolInfo(toolCall.function.name) });
@@ -450,7 +453,7 @@ async function enrichAssistantMessage({
     );
     enrichedToolCalls.push({ ...toolCall, tool_info });
   }
-  return { ...assistantMessage, tool_calls: enrichedToolCalls };
+  return { ...normalizedMessage, tool_calls: enrichedToolCalls };
 }
 
 function isJsonObject(value: unknown): value is Record<string, unknown> {
@@ -558,7 +561,8 @@ export class AgentThread {
       }
     }
 
-    if (this.definition.toolSets?.length) {
+    const hasDeferred = this.definition.toolSets?.some(s => !s.preload) ?? false;
+    if (hasDeferred && this.definition.toolSets?.length) {
       this.deferredTool = new DeferredTool(this.definition.toolSets, {
         tracing: this.tracing,
         logger: input.logger,
@@ -822,6 +826,7 @@ export class AgentThread {
 
     if (tools.length > 0) {
       requestBody.tools = tools;
+      requestBody.tool_choice = 'auto';
     }
 
     return requestBody;
@@ -1077,7 +1082,7 @@ export class AgentThread {
       // Hence, we resolve the underlying tool to get the tool information.
       resolveUnderlyingTool: true,
     });
-    const finishReason = result.value.finish_reason;
+    const finishReason = assistantMessage.tool_calls?.length ? 'tool_calls' : result.value.finish_reason;
     const agentAssistantMessage = buildModelMessageEvent({
       assistantMessage: await enrichAssistantMessage({
         assistantMessage: result.value.output,

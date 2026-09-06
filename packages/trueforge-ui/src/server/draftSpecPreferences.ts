@@ -46,12 +46,13 @@ function storageKeyForKind(kind: DraftPreferenceKind): string {
   return kind === 'chat' ? CHAT_DRAFT_SPEC_PREFERENCES_STORAGE_KEY : AGENT_DRAFT_SPEC_PREFERENCES_STORAGE_KEY;
 }
 
-/** New Chat: model (+ reasoning params), skills, and MCP only — no runtime config. */
+/** New Chat: model (+ reasoning params), skills, MCP, and runtime config. */
 export function selectChatDraftSpecPreferences(spec: AgentSpec): AgentSpec {
   return {
     model: spec.model,
     ...(spec.skills !== undefined ? { skills: spec.skills } : {}),
     ...(spec.mcpServers !== undefined ? { mcpServers: spec.mcpServers } : {}),
+    ...(spec.config !== undefined ? { config: spec.config } : {}),
   };
 }
 
