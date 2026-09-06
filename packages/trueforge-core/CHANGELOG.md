@@ -1,5 +1,24 @@
 # @truefoundry/trueforge-core
 
+## 1.0.0-rc.1
+
+### Major Changes
+
+- bb71458: Replace string creator fields (`created_by` / `triggered_by`) with a non-null `created_by_subject` JSON object on agent, session, schedule, and schedule_run. Ownership and list filters use `tenant_id` + `created_by_subject.subject_id`.
+
+### Minor Changes
+
+- bb71458: Add a TrueFoundry-managed model registry. When `TRUEFOUNDRY_SERVICEFOUNDRY_SERVER_URL` is set, models are listed from the TrueFoundry ServiceFoundry server and turns are routed through the tenant's default AI Gateway with the caller's token. Mutually exclusive with OIDC. Supports internal mutual TLS to the ServiceFoundry server via `TRUEFOUNDRY_MTLS_ENABLED`/`TRUEFOUNDRY_MTLS_CERTS_DIR`.
+
+### Patch Changes
+
+- bb71458: Persist zero-initialized metrics on agent sessions.
+- bb71458: Add caller-scoped session metrics meters, charts, and chart-data under `/internal/metrics` via a server-owned `ISessionMetricsStore`.
+- bb71458: Fold session metrics totals on createTurn and terminal writes.
+- bb71458: Cap Daytona status-refresh calls at 1 minute so a stalled provider cannot hang request handlers.
+- bb71458: Add tenant-unique optional session `external_id`, `Sessions.getOrCreateByExternalId`, and an idempotent `POST /internal/sessions/get-or-create-by-external-id` endpoint and SDK method.
+- bb71458: Add caller-owned session `metadata` (`Record<string, string>` with size limits) on create, update, and read. Persist as a new `session.metadata` jsonb column; leave session `custom` unchanged.
+
 ## 0.2.0-rc.0
 
 ### Minor Changes

@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.3.0-rc.1
+
+### Minor Changes
+
+- bb71458: Add a live advanced agent configuration drawer with shared model, runtime, MCP tool, skill, and Save Agent editors.
+- bb71458: Keep agent configuration visible on the left in full-width builder layouts, make mobile config overlays closable, save the current instruction draft, align builder chrome, and preserve open widgets across chat runtime changes.
+- bb71458: Add routed agent detail pages with lazy Overview, Sessions, and Use In Code tabs backed by the optional AgentSessionsServer port and built-in TrueForge adapter.
+- bb71458: Add a slot-driven agent Metrics tab with aggregate cards, time-range filtering, and Harness-backed line charts.
+- bb71458: Add the agent library Sessions tab and an all-user Sessions sidebar page (including drafts) with agent and time filters, shareable query params, and the same two-pane timeline. Library agent details keep the active tab in `?tab=` so opening an agent lands on Overview.
+- bb71458: Split New Chat vs New Agent: simple chat keeps the Connectors/Skills picker; New Agent keeps Agent Config + Save Agent. Session metadata `is_create_agent` drives resume from the sessions browser.
+- bb71458: Wire schedule test runs and show last five run status chips on the schedules table. Bump `@truefoundry/assistant-ui-runtime` to `0.1.25`.
+- bb71458: Add global Schedules page at `/schedules` with listing, popover-based filters, and create/edit drawer wired to the schedule API. New schedules save as paused, open a Test Schedule review with MCP connect status, and support Activate Anyway. List schedules uses server token pagination and multi-agent filters. Agents shows a Schedules count column (warning when any are paused) loaded via a batched list for on-screen agents. Add Table primitives with client-side and token pagination plus portal DropdownMenu so row actions are not clipped by overflow. Export a reusable popover select with single- and multi-select modes.
+- bb71458: Sidebar layout is a permanent icon+label nav rail (no expand/collapse). Recent chats are hidden from the sidebar and mobile drawer; the drawer shows nav actions only.
+- bb71458: Add a TrueFoundry-managed model registry. When `TRUEFOUNDRY_SERVICEFOUNDRY_SERVER_URL` is set, models are listed from the TrueFoundry ServiceFoundry server and turns are routed through the tenant's default AI Gateway with the caller's token. Mutually exclusive with OIDC. Supports internal mutual TLS to the ServiceFoundry server via `TRUEFOUNDRY_MTLS_ENABLED`/`TRUEFOUNDRY_MTLS_CERTS_DIR`.
+
+### Patch Changes
+
+- bb71458: Refresh composer and composer-trigger styling: 0.75rem composer corners with a light-theme primary-token gradient hairline (faded top → solid bottom) and a neutral hairline in dark, an icon-only tools trigger in place of the "Tools" caption and count badge, the shared `agent-2` glyph on the agents-library trigger, and squared-off chrome-action geometry on the save-agent trigger. Also fixes `agent-2.svg` to use `currentColor` so it is legible in dark mode.
+- bb71458: Load agent Use In Code snippets through `client.internal.agents.getCodeSnippets` instead of a raw `client.fetch`.
+- bb71458: Agent list and details overflow menu: Edit, Clone (`{name}-copy` via saveAgent), Manage Schedules, and Delete (wired through harness `deleteAgent`).
+- bb71458: AgentSessions list pane uses a quieter surface, and the resize grip stays gray until hover, press, or focus.
+- bb71458: Agent Code (`SyntaxHighlighter` / `AgentCodeBlock`) copy control uses the bordered secondary button, and a trailing source newline no longer paints an empty last line while Copy still keeps the exact source.
+- bb71458: Agents, Sessions, and Schedules empty states use a shared centered empty-box screen with title and supporting copy.
+- bb71458: Use Google Sans as the default `trueforge` theme font and load it from Google Fonts when styles are injected.
+- bb71458: Hide Clear chat while the thread is fresh (New Chat, New Agent, and Try Agent) since there is nothing to clear.
+- bb71458: Add a book-icon preload toggle and dashed add button to Agent Config MCP server pills.
+- bb71458: Improve MCP and skill selectors with consistent search sizing, explicit MCP selection controls, grouped tool summaries, and removable MCP chips.
+- bb71458: Revamp the MCP tools selector modal with focus rows, connect empty state, and grouped selected-tools summary.
+- bb71458: Resume Chat / Resume Agent building opens in a new tab when routed (`/sessions/:id` + square-arrow-out-up-right); without a router it keeps the in-shell resume fallback.
+- bb71458: Open the create schedule drawer when Agents "+ Schedule" navigates with `isNew=true`, then clear the flag from the URL.
+- bb71458: Improve Agent Sessions with a resizable divider, accurate turn grouping, optional cost display, and reliable timeline tooltips with sub-agent details. Simplify schedule recurrence and default new schedules to the local timezone.
+- bb71458: Unregister the `/settings` route when Settings chrome is unavailable (no catalog or `capabilities.settings.enabled` is false), matching the sidebar Settings button gate.
+- bb71458: Split New Chat and New Agent draft preference stores. New Chat remembers only model (+ reasoning), skills, and MCP; New Agent keeps the full seed including runtime config.
+- bb71458: Wire TrueFoundry MCP authorize, status, and delete through ServiceFoundry; stub list auth_status; gate oauth2 invoke mid-turn with authRequired; paginate MCP server lists. UI treats SFY consent `code`/`error` on the FE landing like local DCR success/failure.
+- bb71458: Per-turn Tokens in Agent Sessions shows a keyboard-accessible Input / Output / Cached tooltip (Input is uncached).
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+- Updated dependencies [bb71458]
+  - @truefoundry/trueforge-sdk@0.1.4-rc.1
+
 ## 0.3.0-rc.0
 
 ### Minor Changes
